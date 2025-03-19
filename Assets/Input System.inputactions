@@ -1,0 +1,22 @@
+{
+    "name": "Input System",
+    "maps": [],
+    "controlSchemes": [
+        {
+            "name": "Limusine Controller",
+            "bindingGroup": "Limusine Controller",
+            "devices": []
+        },
+        {
+            "name": "Controller",
+            "bindingGroup": "Controller",
+            "devices": [
+                {
+                    "devicePath": "<Gamepad>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
+}
