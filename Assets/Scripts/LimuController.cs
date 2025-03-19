@@ -8,6 +8,8 @@ public class LimuController : MonoBehaviour
     [SerializeField] private float acceleration = 2.0f;
     [SerializeField] private float desacceleration = 1.0f;
     [SerializeField] private float brakeSpeed = 5.0f;
+    [SerializeField] private float reverseSpeed = 3.0f;  // Velocidad máxima en reversa
+    [SerializeField] private float reverseAcceleration = 1.5f; // Aceleración en reversa
 
     private Rigidbody2D rb2D;
     private float currentSpeed = 0f;
@@ -28,17 +30,33 @@ public class LimuController : MonoBehaviour
         }
         else if (brakeInput > 0)
         {
-            // Frena si presionas L2
-            currentSpeed -= brakeSpeed * brakeInput * Time.fixedDeltaTime;
+
+            if (currentSpeed > 0)
+            {
+                // Frena si presionas L2
+                currentSpeed -= brakeSpeed * brakeInput * Time.fixedDeltaTime;
+            }
+            else
+            {
+                // Si el auto está detenido o en reversa, acelera marcha atrás con L2
+                currentSpeed -= reverseAcceleration * brakeInput * Time.fixedDeltaTime;
+            }
+            
         }
         else
         {
-            // Desacelera si no presionas nada
-            currentSpeed -= desacceleration * Time.fixedDeltaTime;
+            if (currentSpeed > 0)
+            {
+                currentSpeed -= desacceleration * Time.fixedDeltaTime;
+            }
+            else if (currentSpeed < 0)
+            {
+                currentSpeed += desacceleration * Time.fixedDeltaTime; // Reduce la reversa
+            }
         }
 
         //La velocidad esta clampeada para no baje de 0 ni suepre el maximo
-        currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
+        currentSpeed = Mathf.Clamp(currentSpeed, -reverseSpeed, maxSpeed);
 
         //Mueve el auto en la direccion que esta mirando
         rb2D.linearVelocity = transform.up * currentSpeed;
