@@ -1,15 +1,17 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.InputSystem;
 
 public class LimuController : MonoBehaviour
 {
     [SerializeField] private float maxSpeed = 5.0f;
     [SerializeField] private float acceleration = 2.0f;
-    [SerializeField] private float brakeSpeed = 3.0f;
+    [SerializeField] private float desacceleration = 1.0f;
+    [SerializeField] private float brakeSpeed = 5.0f;
 
     private Rigidbody2D rb2D;
     private float currentSpeed = 0f;
-    private float throttleInput = 0f; // Para leer la presiÛn del gatillo
+    private float throttleInput = 0f; // Para la aceleraci√≥n (R2)
+    private float brakeInput = 0f;    // Para el freno (L2)
 
     void Start()
     {
@@ -18,29 +20,41 @@ public class LimuController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Acelera progresivamente si se presiona R2
         if (throttleInput > 0)
         {
+            // Acelera si presionas R2
             currentSpeed += acceleration * throttleInput * Time.fixedDeltaTime;
-            currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
+        }
+        else if (brakeInput > 0)
+        {
+            // Frena si presionas L2
+            currentSpeed -= brakeSpeed * brakeInput * Time.fixedDeltaTime;
         }
         else
         {
-            // Desacelera si no se presiona
-            currentSpeed -= brakeSpeed * Time.fixedDeltaTime;
-            currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
+            // Desacelera si no presionas nada
+            currentSpeed -= desacceleration * Time.fixedDeltaTime;
         }
 
-        // Aplica el movimiento en la direcciÛn del auto
-        rb2D.linearVelocity = transform.up * currentSpeed; // ? Ahora usa linearVelocity
+        //La velocidad esta clampeada para no baje de 0 ni suepre el maximo
+        currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
+
+        rb2D.linearVelocity = transform.up * currentSpeed;
     }
 
-    // MÈtodo llamado cuando se presiona R2
+    // Aceleraci√≥n con R2
     public void LimusineSprint(InputAction.CallbackContext callbackContext)
     {
         throttleInput = callbackContext.ReadValue<float>(); // R2 devuelve un float (0 a 1)
     }
+
+    // Freno con L2
+    public void BrakeAction(InputAction.CallbackContext callbackContext)
+    {
+        brakeInput = callbackContext.ReadValue<float>(); // L2 tambi√©n devuelve un float (0 a 1)
+    }
 }
+
 
 
 

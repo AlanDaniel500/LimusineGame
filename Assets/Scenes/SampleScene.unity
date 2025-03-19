@@ -295,8 +295,8 @@ Transform:
   m_GameObject: {fileID: 1312633554}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.9766, y: 0, z: 0}
-  m_LocalScale: {x: 2.9531, y: 1, z: 1}
+  m_LocalPosition: {x: -0.9501, y: 0.8206, z: 0}
+  m_LocalScale: {x: 1.2059294, y: 2.6412, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -417,6 +417,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 97588c11-455a-46b7-b3aa-d794f795527b
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1312633559}
+        m_TargetAssemblyTypeName: LimuController, Assembly-CSharp
+        m_MethodName: BrakeAction
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 25823428-c4a0-4fa7-8004-5ecf7c287cff
+    m_ActionName: 'Player/Brake[/DualShock4GamepadHID/leftTrigger]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -436,7 +452,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 5
   acceleration: 2
-  brakeSpeed: 0
+  desacceleration: 2
+  brakeSpeed: 5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
