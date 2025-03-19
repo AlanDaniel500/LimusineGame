@@ -35,6 +35,7 @@ public class LimuController : MonoBehaviour
         playerControls.Disable();
     }
 
+    //Estoy viendo de hacer que cuando presione el botn el auto avance
     public void LimusineSprint(InputAction.CallbackContext callbackContext)
     {
         if (callbackContext.performed)
