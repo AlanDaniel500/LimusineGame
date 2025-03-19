@@ -4,47 +4,43 @@ using UnityEngine.InputSystem;
 public class LimuController : MonoBehaviour
 {
     [SerializeField] private float maxSpeed = 5.0f;
-    [SerializeField] private float brakeSpeed;
+    [SerializeField] private float acceleration = 2.0f;
+    [SerializeField] private float brakeSpeed = 3.0f;
 
-    public InputAction playerControls;
+    private Rigidbody2D rb2D;
+    private float currentSpeed = 0f;
+    private float throttleInput = 0f; // Para leer la presión del gatillo
 
-    Rigidbody2D rb2D;
-
-    Vector2 moveDirection = Vector2.zero;  
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb2D = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        moveDirection = playerControls.ReadValue<Vector2>();
+        // Acelera progresivamente si se presiona R2
+        if (throttleInput > 0)
+        {
+            currentSpeed += acceleration * throttleInput * Time.fixedDeltaTime;
+            currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
+        }
+        else
+        {
+            // Desacelera si no se presiona
+            currentSpeed -= brakeSpeed * Time.fixedDeltaTime;
+            currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
+        }
+
+        // Aplica el movimiento en la dirección del auto
+        rb2D.linearVelocity = transform.up * currentSpeed; // ? Ahora usa linearVelocity
     }
 
-
-    private void OnEnable()
-    {
-        playerControls.Enable();
-    }
-
-    private void OnDisable()
-    {
-        playerControls.Disable();
-    }
-
-    //Estoy viendo de hacer que cuando presione el botn el auto avance
+    // Método llamado cuando se presiona R2
     public void LimusineSprint(InputAction.CallbackContext callbackContext)
     {
-        if (callbackContext.performed)
-        {
-            rb2D.linearVelocity = new Vector2(callbackContext.ReadValue<Vector2>().x * maxSpeed, rb2D.linearVelocity.y);
-        }
+        throttleInput = callbackContext.ReadValue<float>(); // R2 devuelve un float (0 a 1)
     }
-
-
-
 }
+
+
 

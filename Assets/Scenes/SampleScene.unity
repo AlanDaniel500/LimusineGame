@@ -362,7 +362,19 @@ MonoBehaviour:
     m_ActionId: f60118cd-4f5f-4cb9-a2f9-2f42db42dc8e
     m_ActionName: 'Player/Look[/DualShock4GamepadHID/rightStick,/Mouse/delta,/Pen/delta]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1312633559}
+        m_TargetAssemblyTypeName: LimuController, Assembly-CSharp
+        m_MethodName: LimusineSprint
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: cdde6954-d6da-4445-8217-ce2f304e066a
     m_ActionName: 'Player/Fire[/DualShock4GamepadHID/rightTrigger,/Mouse/leftButton]'
   - m_PersistentCalls:
@@ -423,56 +435,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 5
+  acceleration: 2
   brakeSpeed: 0
-  playerControls:
-    m_Name: Player Controls
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: e63e4339-17e0-46bc-8119-f9b2aa9b8b07
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: 2D Vector
-      m_Id: db9beca7-236a-45c2-994d-1ef47e0c553e
-      m_Path: 2DVector
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Player Controls
-      m_Flags: 4
-    - m_Name: up
-      m_Id: 07c7277f-5ee4-4384-827d-4240d75e2c66
-      m_Path: <Gamepad>/leftStick/up
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Player Controls
-      m_Flags: 8
-    - m_Name: down
-      m_Id: dd4abd16-4fc2-49a4-b174-02be5280c662
-      m_Path: <Gamepad>/leftStick/down
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Player Controls
-      m_Flags: 8
-    - m_Name: left
-      m_Id: f45f50a8-258a-4728-bfea-e3480430c0bf
-      m_Path: <Gamepad>/leftStick/left
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Player Controls
-      m_Flags: 8
-    - m_Name: right
-      m_Id: ef06d171-8c27-4d15-8397-ff21a8b29931
-      m_Path: <Gamepad>/leftStick/right
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Player Controls
-      m_Flags: 8
-    m_Flags: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
