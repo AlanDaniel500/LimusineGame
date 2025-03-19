@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class LimuController : MonoBehaviour
 {
+    [Header("Car Settings")]
     [SerializeField] private float maxSpeed = 5.0f;
     [SerializeField] private float acceleration = 2.0f;
     [SerializeField] private float desacceleration = 1.0f;
