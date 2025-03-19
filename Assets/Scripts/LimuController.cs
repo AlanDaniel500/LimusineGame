@@ -40,6 +40,7 @@ public class LimuController : MonoBehaviour
         //La velocidad esta clampeada para no baje de 0 ni suepre el maximo
         currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
 
+        //Mueve el auto en la direccion que esta mirando
         rb2D.linearVelocity = transform.up * currentSpeed;
     }
 
