@@ -356,9 +356,9 @@ MonoBehaviour:
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1312633559}
-        m_TargetAssemblyTypeName: LimuController, Assembly-CSharp
-        m_MethodName: MoveCar
+      - m_Target: {fileID: 1312633560}
+        m_TargetAssemblyTypeName: CarInputHandler, Assembly-CSharp
+        m_MethodName: OnSteer
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -376,9 +376,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Look[/DualShock4GamepadHID/rightStick,/Mouse/delta,/Pen/delta]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1312633559}
-        m_TargetAssemblyTypeName: LimuController, Assembly-CSharp
-        m_MethodName: LimusineSprint
+      - m_Target: {fileID: 1312633560}
+        m_TargetAssemblyTypeName: CarInputHandler, Assembly-CSharp
+        m_MethodName: OnAccelerate
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -432,9 +432,9 @@ MonoBehaviour:
     m_ActionName: UI/TrackedDeviceOrientation
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1312633559}
-        m_TargetAssemblyTypeName: LimuController, Assembly-CSharp
-        m_MethodName: BrakeAction
+      - m_Target: {fileID: 1312633560}
+        m_TargetAssemblyTypeName: CarInputHandler, Assembly-CSharp
+        m_MethodName: OnBrake
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
