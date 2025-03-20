@@ -4,9 +4,9 @@ using UnityEngine.InputSystem;
 public class TopDownCarController : MonoBehaviour
 {
     [Header("Car Settings")]
-    [SerializeField] private float maxSpeed = 5.0f;
-    [SerializeField] private float accelerationFactor = 2.0f;
-    [SerializeField] private float driftFactor = 0f;
+    [SerializeField] private float maxSpeed = 20.0f;
+    [SerializeField] private float accelerationFactor = 25.0f;
+    [SerializeField] private float driftFactor = 0.95f;
     [SerializeField] private float turnFactor = 3.5f;
     //[SerializeField] private float desacceleration = 1.0f;
     //[SerializeField] private float brakeSpeed = 5.0f;
