@@ -8,21 +8,13 @@ public class TopDownCarController : MonoBehaviour
     [SerializeField] private float accelerationFactor = 25.0f;
     [SerializeField] private float driftFactor = 0.95f;
     [SerializeField] private float turnFactor = 3.5f;
-    //[SerializeField] private float desacceleration = 1.0f;
-    //[SerializeField] private float brakeSpeed = 5.0f;
-    //[SerializeField] private float reverseSpeed = 3.0f;  // Velocidad máxima en reversa
-    //[SerializeField] private float reverseAcceleration = 1.5f; // Aceleración en reversa
 
     private Rigidbody2D rb2D;
 
     //Variables locales
-    //private float currentSpeed = 0f;
     private float accelerationInput = 0f;
-    //private float throttleInput = 0f; // Para la aceleración (R2)
-    //private float brakeInput = 0f;    // Para el freno (L2)
     private float steerInput = 0f;
     private float velocityVsUp = 0f;
-    //private float turnInput = 10.0f;
 
     private float rotationAngle = 0f;
 
