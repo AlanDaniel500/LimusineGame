@@ -58,6 +58,3 @@ public class PassengerRequestSystem : MonoBehaviour
         Debug.Log("¡Pasajero activado!");
     }
 }
-
-
-
