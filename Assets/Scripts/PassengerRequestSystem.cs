@@ -22,31 +22,31 @@ public class PassengerRequestSystem : MonoBehaviour
         acceptButton.onClick.AddListener(OnAcceptButtonPressed);
     }
 
-    // Método que se ejecuta al presionar el botón o tecla definida en el Input System
+    // Metodo que se ejecuta al presionar el botón o tecla definida en el Input System
     public void OnRequestMenu(InputAction.CallbackContext context)
     {
         if (context.performed) 
         {
-            Debug.Log("¡Botón de menú presionado!"); 
-            ToggleMenu(); // Alternamos el estado del menú
+            Debug.Log("¡El botón de menú fue presionado!"); 
+            ToggleMenu(); // Alternamos el estado del menu
         }
     }
 
-    // Método que se llama cuando se presiona el botón "Aceptar" del menú
+    // Metodo que se llama cuando se presiona el botón "Aceptar" del menú
     private void OnAcceptButtonPressed()
     {
-        Debug.Log("¡Botón de 'Aceptar' presionado!"); 
+        Debug.Log("¡El boton de 'Aceptar' fue presionado!"); 
         ToggleMenu(); 
     }
 
-    // Método que abre y cierra el menú
+    // Metodo que abre y cierra el menu
     private void ToggleMenu()
     {
-        isMenuOpen = !isMenuOpen; // Cambia el estado del menú (abierto/cerrado)
+        isMenuOpen = !isMenuOpen; // Cambia el estado del menu (abierto/cerrado)
         requestMenu.SetActive(isMenuOpen); 
         acceptText.gameObject.SetActive(isMenuOpen); 
 
-        if (!isMenuOpen) // Si el menú se cierra Activamos el pasajero
+        if (!isMenuOpen) // Si el menu se cierra Activamos el pasajero
         {
             ActivatePassenger();
         }

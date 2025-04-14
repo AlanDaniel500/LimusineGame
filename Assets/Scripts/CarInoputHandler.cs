@@ -15,14 +15,14 @@ public class CarInputHandler : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Combina aceleración y freno en un solo valor (positivo para avanzar, negativo para reversa)
+        // Combina aceleracion y freno en un solo valor (positivo para avanzar, negativo para reversa)
         float acceleration = throttleInput - brakeInput;
 
         // Enviar inputs al controlador del auto
         topDownCarController.SetInputVector(new Vector2(steerInput, acceleration));
     }
 
-    // Método llamado por Input System cuando mueves el stick izquierdo
+    // Metodo llamado por Input System cuando mueves el stick izquierdo
     public void OnSteer(InputAction.CallbackContext context)
     {
         steerInput = context.ReadValue<Vector2>().x; // Tomamos solo el eje X (izquierda/derecha)

@@ -15,7 +15,7 @@ public class Passenger : MonoBehaviour
         if (!isPickedUp)
         {
             isPickedUp = true;
-            gameObject.SetActive(false); // Ocultamos al pasajero después de recogerlo
+            gameObject.SetActive(false); // Ocultamos al pasajero despues de recogerlo
         }
     }
 
