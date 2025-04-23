@@ -3,39 +3,39 @@ using System.Collections.Generic;
 
 public class LimuPassengerSystem : MonoBehaviour
 {
- 
-    private List<GameObject> passengers = new List<GameObject>();
-    private List<Transform> destinations = new List<Transform>();
+    [SerializeField] private int maxPassengers = 4;
+    private List<Passenger> passengers = new List<Passenger>();
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.CompareTag("Passenger"))
+        if (other.CompareTag("Passenger") && passengers.Count < maxPassengers)
         {
-            GameObject passenger = collision.gameObject;
-
-            // Recoger pasajero
-            passenger.SetActive(false); // Lo ocultamos
-            Debug.Log("Pasajero recogido");
+            Passenger passenger = other.GetComponent<Passenger>();
+            if (passenger != null)
+            {
+                passenger.Pickup();
+                passengers.Add(passenger);
+                Debug.Log("Pasajero recogido. Total: " + passengers.Count);
+            }
         }
 
-
-        if (collision.CompareTag("Destination"))
+        if (other.CompareTag("DropOffPoint"))
         {
-            DropOffPassenger(collision.transform);
+            DropOffPassengers(other.transform);
         }
     }
 
-    private void DropOffPassenger(Transform dropOffPoint)
+    private void DropOffPassengers(Transform dropOffPoint)
     {
         for (int i = passengers.Count - 1; i >= 0; i--)
         {
-            if (destinations[i] == dropOffPoint)
+            if (passengers[i].destination == dropOffPoint)
             {
-                Debug.Log("Pasajero entregado a destino.");
-                Destroy(passengers[i]);
+                passengers[i].DropOff();
                 passengers.RemoveAt(i);
-                destinations.RemoveAt(i);
+                Debug.Log("Pasajero dejado en destino. Restantes: " + passengers.Count);
             }
         }
     }
 }
+
