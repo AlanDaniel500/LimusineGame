@@ -1,51 +1,64 @@
 using UnityEngine;
-
 public class EnemyCarAI : MonoBehaviour
 {
-    [SerializeField] private Transform targetPositionTransform;
+    [Header("Asignación Manual")]
+    [SerializeField] private GameObject passengerObject;
+    [SerializeField] private GameObject destinationObject;
+
     private TopDownCarController carController;
-    private Vector2 targetPosition;
+    private Transform currentTarget;
+    private bool hasPassenger = false;
 
     private void Awake()
     {
         carController = GetComponent<TopDownCarController>();
     }
 
+    private void Start()
+    {
+        if (passengerObject != null)
+        {
+            currentTarget = passengerObject.transform;
+        }
+    }
+
     private void Update()
     {
-        if (targetPositionTransform == null) return;
+        if (currentTarget == null) return;
 
-        SetTargetPosition(targetPositionTransform.position);
-
-        // Dirección hacia el objetivo
-        Vector2 dirToMovePosition = (targetPosition - (Vector2)transform.position).normalized;
-
-        // Calcula cuánta rotación necesita (usamos transform.up en 2D)
-        float angleToTarget = Vector2.SignedAngle(transform.up, dirToMovePosition);
-
-        // Convertimos a valor de giro normalizado (-1 a 1)
+        Vector2 dirToTarget = ((Vector2)currentTarget.position - (Vector2)transform.position).normalized;
+        float angleToTarget = Vector2.SignedAngle(transform.up, dirToTarget);
         float turnAmount = Mathf.Clamp(angleToTarget / 45f, -1f, 1f);
+        float forwardAmount = Vector2.Dot(transform.up, dirToTarget) > 0 ? 1f : -1f;
 
-        // Decidimos si ir hacia adelante o en reversa
-        float forwardAmount = Vector2.Dot(transform.up, dirToMovePosition) > 0 ? 1f : -1f;
-
-        // Detener el auto si ya llegó
-        float distance = Vector2.Distance(transform.position, targetPosition);
+        float distance = Vector2.Distance(transform.position, currentTarget.position);
         if (distance < 0.5f)
         {
             forwardAmount = 0f;
             turnAmount = 0f;
+
+            if (!hasPassenger)
+            {
+                // Lo "recoge"
+                hasPassenger = true;
+                if (passengerObject != null)
+                {
+                    passengerObject.SetActive(false); // Simula recogida
+                }
+
+                currentTarget = destinationObject.transform;
+                Debug.Log("Pasajero recogido por IA");
+            }
+            else
+            {
+                // Lo "entrega"
+                Debug.Log("IA entrego al pasajero.");
+                currentTarget = null;
+                hasPassenger = false;
+
+            }
         }
 
-        // Enviar inputs al auto (x = giro, y = aceleración)
         carController.SetInputVector(new Vector2(turnAmount, forwardAmount));
     }
-
-    public void SetTargetPosition(Vector2 targetPosition)
-    {
-        this.targetPosition = targetPosition;
-    }
 }
-
-
-
