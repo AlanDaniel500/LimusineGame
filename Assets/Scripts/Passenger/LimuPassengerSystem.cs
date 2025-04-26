@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LimuPassengerSystem : MonoBehaviour
 {
-    [SerializeField] private PassengerSpawner passengerSpawner;
+    [SerializeField] private PassengerSpawner passengerSpawner; // LO DEJAMOS PARA EL FUTURO.
     [SerializeField] private GameObject destinationObject;
 
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
@@ -21,7 +21,6 @@ public class LimuPassengerSystem : MonoBehaviour
 
     private void Update()
     {
-
         if (isBoosted)
         {
             boostTimer -= Time.deltaTime;
@@ -50,15 +49,26 @@ public class LimuPassengerSystem : MonoBehaviour
             }
         }
 
-        if (collision.gameObject.CompareTag("Destination"))
+        if (collision.CompareTag("Destination"))
         {
             if (!passengerQueue.IsEmpty)
             {
                 DeliverPassenger();
-                passengerSpawner.SpawnNewPassenger();
+
+                FinishGame();
             }
         }
 
+        //  NO BORRAR , DEJARLO PARA FUTURO
+
+        //if (collision.gameObject.CompareTag("Destination"))
+        //{
+        //    if (!passengerQueue.IsEmpty)
+        //    {
+        //        DeliverPassenger();
+        //        passengerSpawner.SpawnNewPassenger();
+        //    }
+        //}
 
         if (collision.CompareTag("PowerUp"))
         {
@@ -120,6 +130,13 @@ public class LimuPassengerSystem : MonoBehaviour
             Destroy(passenger);
             Debug.Log("Player: Passenger entregado");
         }
+    }
+
+    private void FinishGame()
+    {
+        Debug.Log("Todos los pasajeros fueron entregados!");
+        Time.timeScale = 0f; //  Opcional: congelar el juego
+        // Podrías cargar otra escena o mostrar UI de victoria o de derrota
     }
 
     public int GetPassengerCount()

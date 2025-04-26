@@ -57,6 +57,7 @@ public class EnemyCarAI : MonoBehaviour
                     GameObject deliveredPassenger = passengerQueue.Dequeue();
                     Destroy(deliveredPassenger);
                     Debug.Log("Enemy: Passenger entregado");
+                    FinishGame();
                 }
 
                 currentTarget = null;
@@ -79,6 +80,13 @@ public class EnemyCarAI : MonoBehaviour
             return passengerQueue.Dequeue();
         }
         return null;
+    }
+
+    private void FinishGame()
+    {
+        Debug.Log("Todos los pasajeros fueron entregados!");
+        Time.timeScale = 0f; //  Opcional: congelar el juego
+        // Podrías cargar otra escena o mostrar UI de victoria o de derrota
     }
 }
 
