@@ -1,41 +1,87 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public class LimuPassengerSystem : MonoBehaviour
 {
- 
-    private List<GameObject> passengers = new List<GameObject>();
-    private List<Transform> destinations = new List<Transform>();
+    [SerializeField] private PassengerSpawner passengerSpawner;
+    [SerializeField] private GameObject destinationObject;
+
+    private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
+    private TopDownCarController carController;
+
+    private void Start()
+    {
+        carController = GetComponent<TopDownCarController>();
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+
         if (collision.CompareTag("Passenger"))
         {
-            GameObject passenger = collision.gameObject;
-
-            // Recoger pasajero
-            passenger.SetActive(false); // Lo ocultamos
-            Debug.Log("Pasajero recogido");
-        }
-
-
-        if (collision.CompareTag("Destination"))
-        {
-            DropOffPassenger(collision.transform);
-        }
-    }
-
-    private void DropOffPassenger(Transform dropOffPoint)
-    {
-        for (int i = passengers.Count - 1; i >= 0; i--)
-        {
-            if (destinations[i] == dropOffPoint)
+            PassengerTag passengerTag = collision.GetComponent<PassengerTag>();
+            if (passengerTag != null && !passengerTag.isTaken)
             {
-                Debug.Log("Pasajero entregado a destino.");
-                Destroy(passengers[i]);
-                passengers.RemoveAt(i);
-                destinations.RemoveAt(i);
+                passengerTag.isTaken = true;
+                passengerTag.takenBy = gameObject;
+
+                passengerQueue.Enqueue(collision.gameObject);
+                collision.gameObject.SetActive(false); 
+                Debug.Log("Player: Passenger recogido");
+            }
+        }
+
+        if (collision.gameObject.CompareTag("Destination"))
+        {
+            if (!passengerQueue.IsEmpty)
+            {
+                DeliverPassenger();
+                passengerSpawner.SpawnNewPassenger();
             }
         }
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            EnemyCarAI enemySystem = collision.gameObject.GetComponent<EnemyCarAI>();
+            if (enemySystem != null && enemySystem.HasPassengers())
+            {
+                GameObject stolenPassenger = enemySystem.StealPassenger();
+                if (stolenPassenger != null)
+                {
+                    PassengerTag passengerTag = stolenPassenger.GetComponent<PassengerTag>();
+                    if (passengerTag != null)
+                    {
+                        passengerTag.isTaken = true;
+                        passengerTag.takenBy = gameObject;
+                    }
+
+                    passengerQueue.Enqueue(stolenPassenger);
+                    Debug.Log("Player: ¡Robé un Passenger al Enemy!");
+                }
+            }
+        }
+    }
+
+    public void DeliverPassenger()
+    {
+        if (!passengerQueue.IsEmpty)
+        {
+            GameObject passenger = passengerQueue.Dequeue();
+            Destroy(passenger);
+            Debug.Log("Player: Passenger entregado");
+        }
+    }
+
+    public int GetPassengerCount()
+    {
+        return passengerQueue.Count;
+    }
 }
+
+
+
+
+
+
