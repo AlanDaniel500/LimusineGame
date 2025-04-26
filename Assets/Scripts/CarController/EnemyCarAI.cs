@@ -2,10 +2,6 @@ using UnityEngine;
 
 public class EnemyCarAI : MonoBehaviour
 {
-    [Header("Asignación Manual")]
-    [SerializeField] private GameObject passengerObject;
-    [SerializeField] private GameObject destinationObject;
-
     private TopDownCarController carController;
     private Transform currentTarget;
     private bool hasPassenger = false;
@@ -19,10 +15,7 @@ public class EnemyCarAI : MonoBehaviour
 
     private void Start()
     {
-        if (passengerObject != null)
-        {
-            currentTarget = passengerObject.transform;
-        }
+        FindPassenger();
     }
 
     private void Update()
@@ -43,12 +36,14 @@ public class EnemyCarAI : MonoBehaviour
             if (!hasPassenger)
             {
                 hasPassenger = true;
-                if (passengerObject != null)
+
+                if (currentTarget != null && currentTarget.CompareTag("Passenger"))
                 {
-                    passengerQueue.Enqueue(passengerObject);
+                    passengerQueue.Enqueue(currentTarget.gameObject);
                     Debug.Log("Enemy: Passenger recogido");
                 }
-                currentTarget = destinationObject.transform;
+
+                FindDestination();
             }
             else
             {
@@ -68,6 +63,32 @@ public class EnemyCarAI : MonoBehaviour
         carController.SetInputVector(new Vector2(turnAmount, forwardAmount));
     }
 
+    private void FindPassenger()
+    {
+        GameObject passenger = GameObject.FindGameObjectWithTag("Passenger");
+        if (passenger != null)
+        {
+            currentTarget = passenger.transform;
+        }
+        else
+        {
+            Debug.LogWarning("Enemy: No se encontró Passenger en la escena.");
+        }
+    }
+
+    private void FindDestination()
+    {
+        GameObject destination = GameObject.FindGameObjectWithTag("Destination");
+        if (destination != null)
+        {
+            currentTarget = destination.transform;
+        }
+        else
+        {
+            Debug.LogWarning("Enemy: No se encontró Destination en la escena.");
+        }
+    }
+
     public bool HasPassengers()
     {
         return !passengerQueue.IsEmpty;
@@ -85,7 +106,7 @@ public class EnemyCarAI : MonoBehaviour
     private void FinishGame()
     {
         Debug.Log("Todos los pasajeros fueron entregados!");
-        Time.timeScale = 0f; //  Opcional: congelar el juego
+        Time.timeScale = 0f; // Opcional: congelar el juego
         // Podrías cargar otra escena o mostrar UI de victoria o de derrota
     }
 }
