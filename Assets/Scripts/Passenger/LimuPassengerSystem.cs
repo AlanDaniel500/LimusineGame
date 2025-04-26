@@ -3,15 +3,11 @@ using UnityEngine;
 public class LimuPassengerSystem : MonoBehaviour
 {
     [SerializeField] private PassengerSpawner passengerSpawner;
-    [SerializeField] private GameObject passengerObject;
     [SerializeField] private GameObject destinationObject;
 
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
     private MyStack<PowerUpSpeed> powerUpStack = new MyStack<PowerUpSpeed>();
     private TopDownCarController carController;
-
-    private Transform currentTarget;
-    private bool hasPassenger = false;
 
     private float originalMaxSpeed;
     private bool isBoosted = false;
@@ -21,65 +17,10 @@ public class LimuPassengerSystem : MonoBehaviour
     {
         carController = GetComponent<TopDownCarController>();
         originalMaxSpeed = carController.maxSpeed;
-
-        if (passengerObject != null)
-        {
-            currentTarget = passengerObject.transform;
-        }
     }
 
     private void Update()
     {
-        if (currentTarget == null) return;
-
-        Vector2 dirToTarget = ((Vector2)currentTarget.position - (Vector2)transform.position).normalized;
-        float angleToTarget = Vector2.SignedAngle(transform.up, dirToTarget);
-        float turnAmount = Mathf.Clamp(angleToTarget / 45f, -1f, 1f);
-        float forwardAmount = Vector2.Dot(transform.up, dirToTarget) > 0 ? 1f : -1f;
-
-        float distance = Vector2.Distance(transform.position, currentTarget.position);
-        if (distance < 0.5f)
-        {
-            forwardAmount = 0f;
-            turnAmount = 0f;
-
-            if (!hasPassenger)
-            {
-                hasPassenger = true;
-                if (passengerObject != null)
-                {
-                    PassengerTag passengerTag = passengerObject.GetComponent<PassengerTag>();
-                    if (passengerTag != null && !passengerTag.isTaken)
-                    {
-                        passengerTag.isTaken = true;
-                        passengerTag.takenBy = gameObject;
-                    }
-
-                    passengerQueue.Enqueue(passengerObject);
-                    passengerObject.SetActive(false);
-                    Debug.Log("Player: Passenger recogido");
-                }
-
-                currentTarget = destinationObject.transform;
-            }
-            else
-            {
-                if (!passengerQueue.IsEmpty)
-                {
-                    GameObject passenger = passengerQueue.Dequeue();
-                    Destroy(passenger);
-                    Debug.Log("Player: Passenger entregado");
-
-                    passengerSpawner.SpawnNewPassenger();
-                }
-
-                currentTarget = null;
-                hasPassenger = false;
-            }
-        }
-
-        carController.SetInputVector(new Vector2(turnAmount, forwardAmount));
-
 
         if (isBoosted)
         {
@@ -95,6 +36,29 @@ public class LimuPassengerSystem : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.CompareTag("Passenger"))
+        {
+            PassengerTag passengerTag = collision.GetComponent<PassengerTag>();
+            if (passengerTag != null && !passengerTag.isTaken)
+            {
+                passengerTag.isTaken = true;
+                passengerTag.takenBy = gameObject;
+
+                passengerQueue.Enqueue(collision.gameObject);
+                collision.gameObject.SetActive(false);
+                Debug.Log("Player: Passenger recogido");
+            }
+        }
+
+        if (collision.gameObject.CompareTag("Destination"))
+        {
+            if (!passengerQueue.IsEmpty)
+            {
+                DeliverPassenger();
+                passengerSpawner.SpawnNewPassenger();
+            }
+        }
+
 
         if (collision.CompareTag("PowerUp"))
         {
@@ -106,6 +70,30 @@ public class LimuPassengerSystem : MonoBehaviour
 
                 ApplyNextPowerUp();
                 Destroy(collision.gameObject);
+            }
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            EnemyCarAI enemySystem = collision.gameObject.GetComponent<EnemyCarAI>();
+            if (enemySystem != null && enemySystem.HasPassengers())
+            {
+                GameObject stolenPassenger = enemySystem.StealPassenger();
+                if (stolenPassenger != null)
+                {
+                    PassengerTag passengerTag = stolenPassenger.GetComponent<PassengerTag>();
+                    if (passengerTag != null)
+                    {
+                        passengerTag.isTaken = true;
+                        passengerTag.takenBy = gameObject;
+                    }
+
+                    passengerQueue.Enqueue(stolenPassenger);
+                    Debug.Log("Player: ¡Robé un Passenger al Enemy!");
+                }
             }
         }
     }
@@ -124,18 +112,14 @@ public class LimuPassengerSystem : MonoBehaviour
         }
     }
 
-    public bool HasPassengers()
-    {
-        return !passengerQueue.IsEmpty;
-    }
-
-    public GameObject StealPassenger()
+    public void DeliverPassenger()
     {
         if (!passengerQueue.IsEmpty)
         {
-            return passengerQueue.Dequeue();
+            GameObject passenger = passengerQueue.Dequeue();
+            Destroy(passenger);
+            Debug.Log("Player: Passenger entregado");
         }
-        return null;
     }
 
     public int GetPassengerCount()
@@ -143,9 +127,4 @@ public class LimuPassengerSystem : MonoBehaviour
         return passengerQueue.Count;
     }
 }
-
-
-
-
-
 
