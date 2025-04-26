@@ -7,6 +7,10 @@ TagManager:
   - Passenger
   - DropOffPoint
   - Destination
+  - Enemy
+  - DestinationPlayer
+  - DestinationEnemy
+  - PowerUp
   layers:
   - Default
   - TransparentFX

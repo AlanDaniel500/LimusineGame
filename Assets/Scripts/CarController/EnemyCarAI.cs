@@ -1,4 +1,5 @@
 using UnityEngine;
+
 public class EnemyCarAI : MonoBehaviour
 {
     [Header("Asignación Manual")]
@@ -8,6 +9,8 @@ public class EnemyCarAI : MonoBehaviour
     private TopDownCarController carController;
     private Transform currentTarget;
     private bool hasPassenger = false;
+
+    private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
 
     private void Awake()
     {
@@ -39,26 +42,53 @@ public class EnemyCarAI : MonoBehaviour
 
             if (!hasPassenger)
             {
-                // Lo "recoge"
                 hasPassenger = true;
                 if (passengerObject != null)
                 {
-                    passengerObject.SetActive(false); // Simula recogida
+                    passengerQueue.Enqueue(passengerObject);
+                    Debug.Log("Enemy: Passenger recogido");
                 }
-
                 currentTarget = destinationObject.transform;
-                Debug.Log("Pasajero recogido por IA");
             }
             else
             {
-                // Lo "entrega"
-                Debug.Log("IA entrego al pasajero.");
+                if (!passengerQueue.IsEmpty)
+                {
+                    GameObject deliveredPassenger = passengerQueue.Dequeue();
+                    Destroy(deliveredPassenger);
+                    Debug.Log("Enemy: Passenger entregado");
+                    FinishGame();
+                }
+
                 currentTarget = null;
                 hasPassenger = false;
-
             }
         }
 
         carController.SetInputVector(new Vector2(turnAmount, forwardAmount));
     }
+
+    public bool HasPassengers()
+    {
+        return !passengerQueue.IsEmpty;
+    }
+
+    public GameObject StealPassenger()
+    {
+        if (!passengerQueue.IsEmpty)
+        {
+            return passengerQueue.Dequeue();
+        }
+        return null;
+    }
+
+    private void FinishGame()
+    {
+        Debug.Log("Todos los pasajeros fueron entregados!");
+        Time.timeScale = 0f; //  Opcional: congelar el juego
+        // Podrías cargar otra escena o mostrar UI de victoria o de derrota
+    }
 }
+
+
+
