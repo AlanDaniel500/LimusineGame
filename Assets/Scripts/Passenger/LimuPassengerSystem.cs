@@ -3,75 +3,139 @@ using UnityEngine;
 public class LimuPassengerSystem : MonoBehaviour
 {
     [SerializeField] private PassengerSpawner passengerSpawner;
+    [SerializeField] private GameObject passengerObject;
     [SerializeField] private GameObject destinationObject;
 
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
+    private MyStack<PowerUpSpeed> powerUpStack = new MyStack<PowerUpSpeed>();
     private TopDownCarController carController;
+
+    private Transform currentTarget;
+    private bool hasPassenger = false;
+
+    private float originalMaxSpeed;
+    private bool isBoosted = false;
+    private float boostTimer = 0f;
 
     private void Start()
     {
         carController = GetComponent<TopDownCarController>();
-    }
+        originalMaxSpeed = carController.maxSpeed;
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-
-        if (collision.CompareTag("Passenger"))
+        if (passengerObject != null)
         {
-            PassengerTag passengerTag = collision.GetComponent<PassengerTag>();
-            if (passengerTag != null && !passengerTag.isTaken)
-            {
-                passengerTag.isTaken = true;
-                passengerTag.takenBy = gameObject;
-
-                passengerQueue.Enqueue(collision.gameObject);
-                collision.gameObject.SetActive(false); 
-                Debug.Log("Player: Passenger recogido");
-            }
-        }
-
-        if (collision.gameObject.CompareTag("Destination"))
-        {
-            if (!passengerQueue.IsEmpty)
-            {
-                DeliverPassenger();
-                passengerSpawner.SpawnNewPassenger();
-            }
+            currentTarget = passengerObject.transform;
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void Update()
     {
-        if (collision.gameObject.CompareTag("Enemy"))
+        if (currentTarget == null) return;
+
+        Vector2 dirToTarget = ((Vector2)currentTarget.position - (Vector2)transform.position).normalized;
+        float angleToTarget = Vector2.SignedAngle(transform.up, dirToTarget);
+        float turnAmount = Mathf.Clamp(angleToTarget / 45f, -1f, 1f);
+        float forwardAmount = Vector2.Dot(transform.up, dirToTarget) > 0 ? 1f : -1f;
+
+        float distance = Vector2.Distance(transform.position, currentTarget.position);
+        if (distance < 0.5f)
         {
-            EnemyCarAI enemySystem = collision.gameObject.GetComponent<EnemyCarAI>();
-            if (enemySystem != null && enemySystem.HasPassengers())
+            forwardAmount = 0f;
+            turnAmount = 0f;
+
+            if (!hasPassenger)
             {
-                GameObject stolenPassenger = enemySystem.StealPassenger();
-                if (stolenPassenger != null)
+                hasPassenger = true;
+                if (passengerObject != null)
                 {
-                    PassengerTag passengerTag = stolenPassenger.GetComponent<PassengerTag>();
-                    if (passengerTag != null)
+                    PassengerTag passengerTag = passengerObject.GetComponent<PassengerTag>();
+                    if (passengerTag != null && !passengerTag.isTaken)
                     {
                         passengerTag.isTaken = true;
                         passengerTag.takenBy = gameObject;
                     }
 
-                    passengerQueue.Enqueue(stolenPassenger);
-                    Debug.Log("Player: ¡Robé un Passenger al Enemy!");
+                    passengerQueue.Enqueue(passengerObject);
+                    passengerObject.SetActive(false);
+                    Debug.Log("Player: Passenger recogido");
                 }
+
+                currentTarget = destinationObject.transform;
+            }
+            else
+            {
+                if (!passengerQueue.IsEmpty)
+                {
+                    GameObject passenger = passengerQueue.Dequeue();
+                    Destroy(passenger);
+                    Debug.Log("Player: Passenger entregado");
+
+                    passengerSpawner.SpawnNewPassenger();
+                }
+
+                currentTarget = null;
+                hasPassenger = false;
+            }
+        }
+
+        carController.SetInputVector(new Vector2(turnAmount, forwardAmount));
+
+
+        if (isBoosted)
+        {
+            boostTimer -= Time.deltaTime;
+            if (boostTimer <= 0)
+            {
+                carController.maxSpeed = originalMaxSpeed;
+                isBoosted = false;
+                Debug.Log("Player: Se terminó el boost de velocidad.");
             }
         }
     }
 
-    public void DeliverPassenger()
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+
+        if (collision.CompareTag("PowerUp"))
+        {
+            PowerUpSpeed powerUp = collision.GetComponent<PowerUpSpeed>();
+            if (powerUp != null)
+            {
+                powerUpStack.Push(powerUp);
+                Debug.Log("Player: PowerUp recogido y agregado a la pila.");
+
+                ApplyNextPowerUp();
+                Destroy(collision.gameObject);
+            }
+        }
+    }
+
+    private void ApplyNextPowerUp()
+    {
+        if (!powerUpStack.IsEmpty)
+        {
+            PowerUpSpeed powerUp = powerUpStack.Pop();
+
+            carController.maxSpeed *= powerUp.speedMultiplier;
+            boostTimer = powerUp.duration;
+            isBoosted = true;
+
+            Debug.Log($"Player: Aplicado PowerUp de velocidad x{powerUp.speedMultiplier} por {powerUp.duration} segundos.");
+        }
+    }
+
+    public bool HasPassengers()
+    {
+        return !passengerQueue.IsEmpty;
+    }
+
+    public GameObject StealPassenger()
     {
         if (!passengerQueue.IsEmpty)
         {
-            GameObject passenger = passengerQueue.Dequeue();
-            Destroy(passenger);
-            Debug.Log("Player: Passenger entregado");
+            return passengerQueue.Dequeue();
         }
+        return null;
     }
 
     public int GetPassengerCount()
