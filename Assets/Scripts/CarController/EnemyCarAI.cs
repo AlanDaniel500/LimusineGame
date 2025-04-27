@@ -1,16 +1,21 @@
 using UnityEngine;
 
+
 public class EnemyCarAI : MonoBehaviour
 {
     private TopDownCarController carController;
     private Transform currentTarget;
     private bool hasPassenger = false;
+    private CambiarEscena cambiarEscena;
+
 
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
 
     private void Awake()
     {
         carController = GetComponent<TopDownCarController>();
+        cambiarEscena = FindObjectOfType<CambiarEscena>();
+
     }
 
     private void Start()
@@ -40,7 +45,6 @@ public class EnemyCarAI : MonoBehaviour
                 if (currentTarget != null && currentTarget.CompareTag("Passenger"))
                 {
                     passengerQueue.Enqueue(currentTarget.gameObject);
-                    Debug.Log("Enemy: Passenger recogido");
                 }
 
                 FindDestination();
@@ -105,9 +109,16 @@ public class EnemyCarAI : MonoBehaviour
 
     private void FinishGame()
     {
-        Debug.Log("Todos los pasajeros fueron entregados!");
-        Time.timeScale = 0f; // Opcional: congelar el juego
-        // Podrías cargar otra escena o mostrar UI de victoria o de derrota
+        Debug.Log("Enemy: Todos los pasajeros fueron entregados! Derrota para el jugador.");
+
+        if (cambiarEscena != null)
+        {
+            cambiarEscena.IrADerrota();
+        }
+        else
+        {
+            Debug.LogError("Enemy: No se encontró el script CambiarEscena en la escena.");
+        }
     }
 }
 

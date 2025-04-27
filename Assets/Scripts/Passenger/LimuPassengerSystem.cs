@@ -8,6 +8,7 @@ public class LimuPassengerSystem : MonoBehaviour
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
     private MyStack<PowerUpSpeed> powerUpStack = new MyStack<PowerUpSpeed>();
     private TopDownCarController carController;
+    private CambiarEscena cambiarEscena;
 
     private float originalMaxSpeed;
     private bool isBoosted = false;
@@ -17,6 +18,8 @@ public class LimuPassengerSystem : MonoBehaviour
     {
         carController = GetComponent<TopDownCarController>();
         originalMaxSpeed = carController.maxSpeed;
+
+        cambiarEscena = FindFirstObjectByType<CambiarEscena>();
     }
 
     private void Update()
@@ -39,7 +42,7 @@ public class LimuPassengerSystem : MonoBehaviour
         {
             passengerQueue.Enqueue(collision.gameObject);
 
-            collision.gameObject.SetActive(false); // Desactivar el objeto del pasajero
+            collision.gameObject.SetActive(false);
             Debug.Log("Player: Pasajero recogido.");
         }
 
@@ -131,8 +134,15 @@ public class LimuPassengerSystem : MonoBehaviour
     private void FinishGame()
     {
         Debug.Log("Todos los pasajeros fueron entregados!");
-        Time.timeScale = 0f; //  Opcional: congelar el juego
-        // Podrías cargar otra escena o mostrar UI de victoria o de derrota
+
+        if (cambiarEscena != null)
+        {
+            cambiarEscena.IrAVictoria();
+        }
+        else
+        {
+            Debug.LogError("No se encontró CambiarEscena en la escena.");
+        }
     }
 
     public int GetPassengerCount()
