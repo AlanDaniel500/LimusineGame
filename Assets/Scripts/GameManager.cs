@@ -8,16 +8,29 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMP_Text victoryText;
     [SerializeField] private float delayBeforeRestart = 5f;
 
+    private LimuPassengerSystem playerSystem;
+    private EnemyCarAI enemySystem;
+
+    private void Start()
+    {
+        playerSystem = FindFirstObjectByType<LimuPassengerSystem>();
+        enemySystem = FindFirstObjectByType<EnemyCarAI>();
+    }
+
     private void Update()
     {
-        int remainingPassengers = GameObject.FindGameObjectsWithTag("Passenger").Length;
+        bool playerHasPassengers = playerSystem != null && playerSystem.GetPassengerCount() > 0;
+        bool enemyHasPassengers = enemySystem != null && enemySystem.HasPassengers();
 
-        if (remainingPassengers == 0)
+        bool noPassengersInScene = GameObject.FindGameObjectsWithTag("Passenger").Length == 0;
+
+        if (noPassengersInScene && !playerHasPassengers && !enemyHasPassengers)
         {
+            // ¡Realmente terminó el juego!
             if (victoryText != null)
             {
                 victoryText.gameObject.SetActive(true);
-                victoryText.text = "¡Todos los pasajeros fueron recogidos!";
+                victoryText.text = "¡Todos los pasajeros fueron recogidos y entregados!";
             }
 
             Invoke(nameof(RestartGame), delayBeforeRestart);
@@ -29,4 +42,5 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
+
 

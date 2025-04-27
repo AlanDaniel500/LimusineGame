@@ -37,16 +37,10 @@ public class LimuPassengerSystem : MonoBehaviour
     {
         if (collision.CompareTag("Passenger"))
         {
-            PassengerTag passengerTag = collision.GetComponent<PassengerTag>();
-            if (passengerTag != null && !passengerTag.isTaken)
-            {
-                passengerTag.isTaken = true;
-                passengerTag.takenBy = gameObject;
+            passengerQueue.Enqueue(collision.gameObject);
 
-                passengerQueue.Enqueue(collision.gameObject);
-                collision.gameObject.SetActive(false);
-                Debug.Log("Player: Passenger recogido");
-            }
+            collision.gameObject.SetActive(false); // Desactivar el objeto del pasajero
+            Debug.Log("Player: Pasajero recogido.");
         }
 
         if (collision.CompareTag("Destination"))
@@ -54,21 +48,9 @@ public class LimuPassengerSystem : MonoBehaviour
             if (!passengerQueue.IsEmpty)
             {
                 DeliverPassenger();
-
                 FinishGame();
             }
         }
-
-        //  NO BORRAR , DEJARLO PARA FUTURO
-
-        //if (collision.gameObject.CompareTag("Destination"))
-        //{
-        //    if (!passengerQueue.IsEmpty)
-        //    {
-        //        DeliverPassenger();
-        //        passengerSpawner.SpawnNewPassenger();
-        //    }
-        //}
 
         if (collision.CompareTag("PowerUp"))
         {
@@ -76,13 +58,27 @@ public class LimuPassengerSystem : MonoBehaviour
             if (powerUp != null)
             {
                 powerUpStack.Push(powerUp);
-                Debug.Log("Player: PowerUp recogido y agregado a la pila.");
+                Debug.Log("Player: PowerUp recogido.");
 
                 ApplyNextPowerUp();
                 Destroy(collision.gameObject);
             }
         }
     }
+
+
+    //  NO BORRAR , DEJARLO PARA FUTURO
+
+    //if (collision.gameObject.CompareTag("Destination"))
+    //{
+    //    if (!passengerQueue.IsEmpty)
+    //    {
+    //        DeliverPassenger();
+    //        passengerSpawner.SpawnNewPassenger();
+    //    }
+    //}
+
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -102,7 +98,7 @@ public class LimuPassengerSystem : MonoBehaviour
                     }
 
                     passengerQueue.Enqueue(stolenPassenger);
-                    Debug.Log("Player: ¡Robé un Passenger al Enemy!");
+                    Debug.Log("Player: ¡Robé un Pasajero al Enemigo!");
                 }
             }
         }
