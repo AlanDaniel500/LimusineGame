@@ -113,7 +113,7 @@ public class LimuPassengerSystem : MonoBehaviour
         {
             PowerUpSpeed powerUp = powerUpStack.Pop();
 
-            carController.maxSpeed *= powerUp.speedMultiplier;
+            carController.maxSpeed = originalMaxSpeed * powerUp.speedMultiplier;
             boostTimer = powerUp.duration;
             isBoosted = true;
 
