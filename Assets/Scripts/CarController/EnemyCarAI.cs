@@ -5,13 +5,12 @@ public class EnemyCarAI : MonoBehaviour
 {
     private TopDownCarController carController;
     private Transform currentTarget;
-    private Transform destinationTarget = null;
+    private bool hasPassenger = false;
     private CambiarEscena cambiarEscena;
 
     private GameObject currentPassenger = null;
+    private Transform destinationTarget = null;
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
-
-    private bool HasPassenger => !passengerQueue.IsEmpty;
 
     private void Awake()
     {
@@ -21,54 +20,48 @@ public class EnemyCarAI : MonoBehaviour
 
     private IEnumerator Start()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
         FindPassengerOrDestination();
     }
 
     private void Update()
     {
-        //  Si le robaron el pasajero en el camino
-        if (!HasPassenger && destinationTarget != null && currentTarget == destinationTarget)
+        if (!hasPassenger)
         {
-            Debug.Log("Enemy: Me robaron el pasajero. Cambio de objetivo.");
-            destinationTarget = null;
-            currentTarget = null;
-            FindPassengerOrDestination();
-            return;
-        }
-
-        if (currentTarget == null)
-        {
-            FindPassengerOrDestination();
-            return;
-        }
-
-        //  Si el passenger fue tomado antes de que llegue
-        if (!HasPassenger && currentPassenger != null)
-        {
-            PassengerTag tag = currentPassenger.GetComponent<PassengerTag>();
-
-            if (tag == null || tag.isTaken)
+            if (currentPassenger != null)
             {
-                if (tag != null && tag.takenBy != gameObject && tag.destination != null)
-                {
-                    Debug.Log("Enemy: Me robaron el pasajero. Cambio de objetivo.");
-                    destinationTarget = tag.destination.transform;
-                    currentTarget = destinationTarget;
-                    currentPassenger = null;
-                    return;
-                }
+                PassengerTag tag = currentPassenger.GetComponent<PassengerTag>();
 
-                // Si el tag no existe o el destino ya fue destruido
-                currentPassenger = null;
-                currentTarget = null;
-                FindPassengerOrDestination();
-                return;
+                if (tag == null || tag.isTaken)
+                {
+                    if (tag != null && tag.takenBy != gameObject && tag.destination != null)
+                    {
+                        destinationTarget = tag.destination.transform;
+                        currentTarget = destinationTarget;
+                        currentPassenger = null;
+                        Debug.Log("Enemy: Me robaron el pasajero. Voy al destino.");
+                    }
+                    else
+                    {
+                        currentPassenger = null;
+                        currentTarget = null;
+                        Debug.Log("Enemy: Passenger ya no es válido. Busco uno nuevo.");
+                        FindPassengerOrDestination();
+                    }
+                }
+            }
+            else
+            {
+                if (currentTarget == null || !currentTarget.CompareTag("Destination"))
+                {
+                    Debug.Log("Enemy: Sin passenger ni destino. Busco uno nuevo.");
+                    FindPassengerOrDestination();
+                }
             }
         }
 
+        if (currentTarget == null) return;
 
-        // Movimiento hacia el target
         Vector2 dirToTarget = ((Vector2)currentTarget.position - (Vector2)transform.position).normalized;
         float angleToTarget = Vector2.SignedAngle(transform.up, dirToTarget);
         float turnAmount = Mathf.Clamp(angleToTarget / 45f, -1f, 1f);
@@ -80,13 +73,13 @@ public class EnemyCarAI : MonoBehaviour
             forwardAmount = 0f;
             turnAmount = 0f;
 
-            if (HasPassenger)
+            if (!hasPassenger)
             {
-                DeliverPassenger();
+                TryPickupPassenger();
             }
             else
             {
-                TryPickupPassenger();
+                DeliverPassenger();
             }
         }
 
@@ -107,6 +100,7 @@ public class EnemyCarAI : MonoBehaviour
         currentPassenger.SetActive(false);
         Debug.Log("Enemy: Passenger recogido");
 
+        hasPassenger = true;
         destinationTarget = tag.destination != null ? tag.destination.transform : null;
         currentTarget = destinationTarget;
     }
@@ -126,15 +120,15 @@ public class EnemyCarAI : MonoBehaviour
         PassengerTag tag = deliveredPassenger.GetComponent<PassengerTag>();
         if (tag != null && tag.destination != null)
         {
-            Destroy(tag.destination); 
+            Destroy(tag.destination);
         }
 
         Destroy(deliveredPassenger);
         Debug.Log("Enemy: Passenger entregado");
 
+        hasPassenger = false;
         currentPassenger = null;
         currentTarget = null;
-        destinationTarget = null;
 
         FinishGame();
         StartCoroutine(DelayedSearch());
@@ -162,17 +156,15 @@ public class EnemyCarAI : MonoBehaviour
             }
         }
 
-        // Fallback: ir a cualquier destino si no queda passenger
         GameObject[] destinations = GameObject.FindGameObjectsWithTag("Destination");
         if (destinations.Length > 0)
         {
             currentTarget = destinations[0].transform;
-            destinationTarget = currentTarget;
             Debug.Log("Enemy: No hay Passenger libre, voy a un destino.");
         }
         else
         {
-            Debug.LogWarning("Enemy: No hay Passenger ni Destination en la escena.");
+            Debug.LogWarning("Enemy: No hay passenger ni destino.");
             currentTarget = null;
         }
     }
