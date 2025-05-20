@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LimuPassengerSystem : MonoBehaviour
 {
-    [SerializeField] private PassengerSpawner passengerSpawner; // LO DEJAMOS PARA EL FUTURO.
+    [SerializeField] private PassengerSpawner passengerSpawner;
     [SerializeField] private GameObject destinationObject;
 
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
@@ -18,7 +18,6 @@ public class LimuPassengerSystem : MonoBehaviour
     {
         carController = GetComponent<TopDownCarController>();
         originalMaxSpeed = carController.maxSpeed;
-
         cambiarEscena = FindFirstObjectByType<CambiarEscena>();
     }
 
@@ -40,10 +39,16 @@ public class LimuPassengerSystem : MonoBehaviour
     {
         if (collision.CompareTag("Passenger"))
         {
-            passengerQueue.Enqueue(collision.gameObject);
+            PassengerTag tag = collision.GetComponent<PassengerTag>();
+            if (tag != null && !tag.isTaken)
+            {
+                tag.isTaken = true;
+                tag.takenBy = gameObject;
 
-            collision.gameObject.SetActive(false);
-            Debug.Log("Player: Pasajero recogido.");
+                passengerQueue.Enqueue(collision.gameObject);
+                collision.gameObject.SetActive(false);
+                Debug.Log("Player: Pasajero recogido.");
+            }
         }
 
         if (collision.CompareTag("Destination"))
@@ -62,26 +67,11 @@ public class LimuPassengerSystem : MonoBehaviour
             {
                 powerUpStack.Push(powerUp);
                 Debug.Log("Player: PowerUp recogido.");
-
                 ApplyNextPowerUp();
                 Destroy(collision.gameObject);
             }
         }
     }
-
-
-    //  NO BORRAR , DEJARLO PARA FUTURO
-
-    //if (collision.gameObject.CompareTag("Destination"))
-    //{
-    //    if (!passengerQueue.IsEmpty)
-    //    {
-    //        DeliverPassenger();
-    //        passengerSpawner.SpawnNewPassenger();
-    //    }
-    //}
-
-
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -93,11 +83,11 @@ public class LimuPassengerSystem : MonoBehaviour
                 GameObject stolenPassenger = enemySystem.StealPassenger();
                 if (stolenPassenger != null)
                 {
-                    PassengerTag passengerTag = stolenPassenger.GetComponent<PassengerTag>();
-                    if (passengerTag != null)
+                    PassengerTag tag = stolenPassenger.GetComponent<PassengerTag>();
+                    if (tag != null)
                     {
-                        passengerTag.isTaken = true;
-                        passengerTag.takenBy = gameObject;
+                        tag.isTaken = true;
+                        tag.takenBy = gameObject;
                     }
 
                     passengerQueue.Enqueue(stolenPassenger);
@@ -117,7 +107,7 @@ public class LimuPassengerSystem : MonoBehaviour
             boostTimer = powerUp.duration;
             isBoosted = true;
 
-            Debug.Log($"Player: Aplicado PowerUp de velocidad x{powerUp.speedMultiplier} por {powerUp.duration} segundos.");
+            Debug.Log($"Player: PowerUp x{powerUp.speedMultiplier} por {powerUp.duration} seg.");
         }
     }
 
@@ -126,28 +116,54 @@ public class LimuPassengerSystem : MonoBehaviour
         if (!passengerQueue.IsEmpty)
         {
             GameObject passenger = passengerQueue.Dequeue();
-            Destroy(passenger);
+
+            PassengerManager manager = FindFirstObjectByType<PassengerManager>();
+            if (manager != null)
+            {
+                manager.NotifyPassengerDelivered(passenger);
+            }
+
+            PassengerTag tag = passenger.GetComponent<PassengerTag>();
+            if (tag != null && tag.destination != null)
+            {
+                Destroy(tag.destination); // destruir destino
+            }
+
+            Destroy(passenger); //  destruir pasajero
             Debug.Log("Player: Passenger entregado");
         }
     }
 
     private void FinishGame()
     {
-        Debug.Log("Todos los pasajeros fueron entregados!");
+        PassengerManager manager = FindFirstObjectByType<PassengerManager>();
 
-        if (cambiarEscena != null)
+        if (manager != null && manager.AllDelivered())
         {
-            cambiarEscena.IrAVictoria();
-        }
-        else
-        {
-            Debug.LogError("No se encontró CambiarEscena en la escena.");
+            Debug.Log("Todos los pasajeros fueron entregados!");
+
+            if (cambiarEscena != null)
+            {
+                cambiarEscena.IrAVictoria();
+            }
+            else
+            {
+                Debug.LogError("No se encontró CambiarEscena.");
+            }
         }
     }
 
-    public int GetPassengerCount()
+    public int GetPassengerCount() => passengerQueue.Count;
+
+    public bool HasPassengers() => !passengerQueue.IsEmpty;
+
+    public GameObject StealPassenger()
     {
-        return passengerQueue.Count;
+        if (!passengerQueue.IsEmpty)
+        {
+            return passengerQueue.Dequeue();
+        }
+        return null;
     }
 }
 
