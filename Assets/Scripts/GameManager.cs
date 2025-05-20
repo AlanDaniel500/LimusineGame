@@ -10,11 +10,13 @@ public class GameManager : MonoBehaviour
 
     private LimuPassengerSystem playerSystem;
     private EnemyCarAI enemySystem;
+    private PassengerManager manager;
 
     private void Start()
     {
         playerSystem = FindFirstObjectByType<LimuPassengerSystem>();
         enemySystem = FindFirstObjectByType<EnemyCarAI>();
+        manager = FindFirstObjectByType<PassengerManager>();
     }
 
     private void Update()
@@ -22,11 +24,8 @@ public class GameManager : MonoBehaviour
         bool playerHasPassengers = playerSystem != null && playerSystem.GetPassengerCount() > 0;
         bool enemyHasPassengers = enemySystem != null && enemySystem.HasPassengers();
 
-        bool noPassengersInScene = GameObject.FindGameObjectsWithTag("Passenger").Length == 0;
-
-        if (noPassengersInScene && !playerHasPassengers && !enemyHasPassengers)
+        if (manager != null && manager.AllDelivered() && !playerHasPassengers && !enemyHasPassengers)
         {
-            // ¡Realmente terminó el juego!
             if (victoryText != null)
             {
                 victoryText.gameObject.SetActive(true);
