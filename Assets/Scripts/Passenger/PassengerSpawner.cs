@@ -6,36 +6,32 @@ public class PassengerSpawner : MonoBehaviour
     [SerializeField] private GameObject passengerPrefab;
     [SerializeField] private GameObject destinationPrefab;
 
-    [Header("Rangos")]
-    [SerializeField] private Vector2 rangoSpawnMin;
-    [SerializeField] private Vector2 rangoSpawnMax;
+    private Nodo[] nodos;
+
+    private void Awake()
+    {
+        nodos = FindObjectsOfType<Nodo>();
+    }
 
     public GameObject SpawnPassengerWithDestination()
     {
-        Vector2 passengerPos = new Vector2(
-            Random.Range(rangoSpawnMin.x, rangoSpawnMax.x),
-            Random.Range(rangoSpawnMin.y, rangoSpawnMax.y)
-        );
+        if (nodos.Length < 2)
+        {
+            Debug.LogError("Se necesitan al menos 2 nodos para spawnear.");
+            return null;
+        }
 
-        Vector2 destinationPos;
-        int maxTries = 15;
-        float minDistance = 10f;
-        int tries = 0;
-
+        Nodo nodoPasajero, nodoDestino;
         do
         {
-            destinationPos = new Vector2(
-                Random.Range(rangoSpawnMin.x, rangoSpawnMax.x),
-                Random.Range(rangoSpawnMin.y, rangoSpawnMax.y)
-            );
-            tries++;
-        }
-        while (Vector2.Distance(passengerPos, destinationPos) < minDistance && tries < maxTries);
+            nodoPasajero = nodos[Random.Range(0, nodos.Length)];
+            nodoDestino = nodos[Random.Range(0, nodos.Length)];
+        } while (nodoPasajero == nodoDestino);
 
-        GameObject passenger = Instantiate(passengerPrefab, passengerPos, Quaternion.identity);
+        GameObject passenger = Instantiate(passengerPrefab, nodoPasajero.Posicion, Quaternion.identity);
         passenger.tag = "Passenger";
 
-        GameObject destination = Instantiate(destinationPrefab, destinationPos, Quaternion.identity);
+        GameObject destination = Instantiate(destinationPrefab, nodoDestino.Posicion, Quaternion.identity);
         destination.tag = "Destination";
 
         PassengerTag tag = passenger.GetComponent<PassengerTag>();
@@ -45,6 +41,4 @@ public class PassengerSpawner : MonoBehaviour
         return passenger;
     }
 }
-
-
 

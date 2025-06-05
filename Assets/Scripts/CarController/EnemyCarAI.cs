@@ -1,85 +1,65 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyCarAI : MonoBehaviour
 {
     private TopDownCarController carController;
-    private Transform currentTarget;
-    private bool hasPassenger = false;
     private CambiarEscena cambiarEscena;
+    private GraphManager graphManager;
 
     private GameObject currentPassenger = null;
     private Transform destinationTarget = null;
+
+    private Queue<Nodo> currentPath = new Queue<Nodo>();
+    private Nodo currentNodoObjetivo = null;
+
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
+    private bool hasPassenger = false;
 
     private void Awake()
     {
         carController = GetComponent<TopDownCarController>();
         cambiarEscena = FindFirstObjectByType<CambiarEscena>();
+        graphManager = FindFirstObjectByType<GraphManager>();
     }
 
     private IEnumerator Start()
     {
         yield return new WaitForSeconds(0.3f);
-        FindPassengerOrDestination();
+        FindNewObjective();
     }
 
     private void Update()
     {
-        if (!hasPassenger)
+        if (currentPath.Count == 0)
         {
-            if (currentPassenger != null)
-            {
-                PassengerTag tag = currentPassenger.GetComponent<PassengerTag>();
-
-                if (tag == null || tag.isTaken)
-                {
-                    if (tag != null && tag.takenBy != gameObject && tag.destination != null)
-                    {
-                        destinationTarget = tag.destination.transform;
-                        currentTarget = destinationTarget;
-                        currentPassenger = null;
-                        Debug.Log("Enemy: Me robaron el pasajero. Voy al destino.");
-                    }
-                    else
-                    {
-                        currentPassenger = null;
-                        currentTarget = null;
-                        Debug.Log("Enemy: Passenger ya no es válido. Busco uno nuevo.");
-                        FindPassengerOrDestination();
-                    }
-                }
-            }
-            else
-            {
-                if (currentTarget == null || !currentTarget.CompareTag("Destination"))
-                {
-                    Debug.Log("Enemy: Sin passenger ni destino. Busco uno nuevo.");
-                    FindPassengerOrDestination();
-                }
-            }
+            FindNewObjective();
+            return;
         }
 
-        if (currentTarget == null) return;
+        Nodo nodoDestino = currentPath.Peek();
+        Vector2 dir = ((Vector2)nodoDestino.Posicion - (Vector2)transform.position).normalized;
+        float angle = Vector2.SignedAngle(transform.up, dir);
+        float turnAmount = Mathf.Clamp(angle / 45f, -1f, 1f);
+        float forwardAmount = Vector2.Dot(transform.up, dir) > 0 ? 1f : -1f;
 
-        Vector2 dirToTarget = ((Vector2)currentTarget.position - (Vector2)transform.position).normalized;
-        float angleToTarget = Vector2.SignedAngle(transform.up, dirToTarget);
-        float turnAmount = Mathf.Clamp(angleToTarget / 45f, -1f, 1f);
-        float forwardAmount = Vector2.Dot(transform.up, dirToTarget) > 0 ? 1f : -1f;
-
-        float distance = Vector2.Distance(transform.position, currentTarget.position);
-        if (distance < 0.5f)
+        float distancia = Vector2.Distance(transform.position, nodoDestino.Posicion);
+        if (distancia < 0.5f)
         {
-            forwardAmount = 0f;
-            turnAmount = 0f;
+            currentPath.Dequeue();
 
-            if (!hasPassenger)
+            if (currentPath.Count == 0)
             {
-                TryPickupPassenger();
-            }
-            else
-            {
-                DeliverPassenger();
+                if (!hasPassenger)
+                {
+                    TryPickupPassenger();
+                }
+                else
+                {
+                    DeliverPassenger();
+                }
+                return;
             }
         }
 
@@ -98,37 +78,37 @@ public class EnemyCarAI : MonoBehaviour
 
         passengerQueue.Enqueue(currentPassenger);
         currentPassenger.SetActive(false);
-        Debug.Log("Enemy: Passenger recogido");
-
         hasPassenger = true;
-        destinationTarget = tag.destination != null ? tag.destination.transform : null;
-        currentTarget = destinationTarget;
+
+        destinationTarget = tag.destination?.transform;
+        FindPathTo(destinationTarget.position);
+        Debug.Log("Enemy: Passenger recogido");
     }
 
     private void DeliverPassenger()
     {
         if (passengerQueue.IsEmpty) return;
 
-        GameObject deliveredPassenger = passengerQueue.Dequeue();
+        GameObject passenger = passengerQueue.Dequeue();
 
         PassengerManager manager = FindFirstObjectByType<PassengerManager>();
         if (manager != null)
         {
-            manager.NotifyPassengerDelivered(deliveredPassenger);
+            manager.NotifyPassengerDelivered(passenger);
         }
 
-        PassengerTag tag = deliveredPassenger.GetComponent<PassengerTag>();
+        PassengerTag tag = passenger.GetComponent<PassengerTag>();
         if (tag != null && tag.destination != null)
         {
             Destroy(tag.destination);
         }
 
-        Destroy(deliveredPassenger);
+        Destroy(passenger);
         Debug.Log("Enemy: Passenger entregado");
 
         hasPassenger = false;
         currentPassenger = null;
-        currentTarget = null;
+        destinationTarget = null;
 
         FinishGame();
         StartCoroutine(DelayedSearch());
@@ -136,48 +116,103 @@ public class EnemyCarAI : MonoBehaviour
 
     private IEnumerator DelayedSearch()
     {
-        yield return new WaitForSeconds(0.5f);
-        FindPassengerOrDestination();
+        yield return new WaitForSeconds(0.3f);
+        FindNewObjective();
     }
 
-    private void FindPassengerOrDestination()
+    private void FindNewObjective()
     {
-        GameObject[] passengers = GameObject.FindGameObjectsWithTag("Passenger");
-
-        foreach (GameObject p in passengers)
+        if (!hasPassenger)
         {
-            PassengerTag tag = p.GetComponent<PassengerTag>();
-            if (tag != null && !tag.isTaken)
+            GameObject[] passengers = GameObject.FindGameObjectsWithTag("Passenger");
+            foreach (GameObject p in passengers)
             {
-                currentPassenger = p;
-                currentTarget = p.transform;
-                Debug.Log("Enemy: Encontré Passenger libre.");
-                return;
+                PassengerTag tag = p.GetComponent<PassengerTag>();
+                if (tag != null && !tag.isTaken)
+                {
+                    currentPassenger = p;
+                    FindPathTo(p.transform.position);
+                    Debug.Log("Enemy: Encontré passenger libre.");
+                    return;
+                }
+            }
+
+            // No hay pasajeros, buscar destinos para interceptar
+            GameObject[] destinations = GameObject.FindGameObjectsWithTag("Destination");
+            if (destinations.Length > 0)
+            {
+                FindPathTo(destinations[0].transform.position);
+                Debug.Log("Enemy: No hay Passenger, voy a un destino.");
+            }
+            else
+            {
+                Debug.LogWarning("Enemy: No hay Passenger ni destino.");
+            }
+        }
+        else if (destinationTarget != null)
+        {
+            FindPathTo(destinationTarget.position);
+        }
+    }
+
+    private void FindPathTo(Vector2 objetivo)
+    {
+        Nodo origen = graphManager.GetNodoCercano(transform.position);
+        Nodo destino = graphManager.GetNodoCercano(objetivo);
+
+        if (origen == null || destino == null)
+        {
+            Debug.LogWarning("Enemy: Nodos inválidos para pathfinding.");
+            return;
+        }
+
+        List<Nodo> path = Dijkstra(origen, destino);
+        currentPath = new Queue<Nodo>(path);
+    }
+
+    private List<Nodo> Dijkstra(Nodo inicio, Nodo destino)
+    {
+        Dictionary<Nodo, float> distancias = new Dictionary<Nodo, float>();
+        Dictionary<Nodo, Nodo> anteriores = new Dictionary<Nodo, Nodo>();
+        List<Nodo> nodosNoVisitados = new List<Nodo>(graphManager.todosLosNodos);
+
+        foreach (Nodo nodo in nodosNoVisitados)
+        {
+            distancias[nodo] = float.MaxValue;
+        }
+
+        distancias[inicio] = 0;
+
+        while (nodosNoVisitados.Count > 0)
+        {
+            nodosNoVisitados.Sort((a, b) => distancias[a].CompareTo(distancias[b]));
+            Nodo actual = nodosNoVisitados[0];
+            nodosNoVisitados.RemoveAt(0);
+
+            if (actual == destino)
+                break;
+
+            foreach (Nodo vecino in actual.vecinos)
+            {
+                float nuevaDist = distancias[actual] + Vector2.Distance(actual.Posicion, vecino.Posicion);
+                if (nuevaDist < distancias[vecino])
+                {
+                    distancias[vecino] = nuevaDist;
+                    anteriores[vecino] = actual;
+                }
             }
         }
 
-        GameObject[] destinations = GameObject.FindGameObjectsWithTag("Destination");
-        if (destinations.Length > 0)
+        List<Nodo> camino = new List<Nodo>();
+        Nodo nodoActual = destino;
+        while (anteriores.ContainsKey(nodoActual))
         {
-            currentTarget = destinations[0].transform;
-            Debug.Log("Enemy: No hay Passenger libre, voy a un destino.");
+            camino.Insert(0, nodoActual);
+            nodoActual = anteriores[nodoActual];
         }
-        else
-        {
-            Debug.LogWarning("Enemy: No hay passenger ni destino.");
-            currentTarget = null;
-        }
-    }
 
-    public bool HasPassengers() => !passengerQueue.IsEmpty;
-
-    public GameObject StealPassenger()
-    {
-        if (!passengerQueue.IsEmpty)
-        {
-            return passengerQueue.Dequeue();
-        }
-        return null;
+        if (camino.Count == 0) camino.Add(destino); // fallback
+        return camino;
     }
 
     private void FinishGame()
@@ -191,5 +226,16 @@ public class EnemyCarAI : MonoBehaviour
                 cambiarEscena.IrADerrota();
             }
         }
+    }
+
+    public bool HasPassengers() => !passengerQueue.IsEmpty;
+
+    public GameObject StealPassenger()
+    {
+        if (!passengerQueue.IsEmpty)
+        {
+            return passengerQueue.Dequeue();
+        }
+        return null;
     }
 }
