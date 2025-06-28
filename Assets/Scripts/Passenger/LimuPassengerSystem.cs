@@ -18,6 +18,8 @@ public class LimuPassengerSystem : MonoBehaviour
     {
         carController = GetComponent<TopDownCarController>();
         originalMaxSpeed = carController.maxSpeed;
+
+        carController.maxSpeed *= GameSessionManager.Instance.speedMultiplier;
         cambiarEscena = FindFirstObjectByType<CambiarEscena>();
     }
 
@@ -144,11 +146,8 @@ public class LimuPassengerSystem : MonoBehaviour
 
             if (cambiarEscena != null)
             {
-                cambiarEscena.IrAVictoria();
-            }
-            else
-            {
-                Debug.LogError("No se encontró CambiarEscena.");
+                GameSessionManager.Instance.upgradePoints = GameSessionManager.Instance.deliveredPassengers;
+                cambiarEscena.FinishLevel(); // va a UpgradeScene
             }
         }
     }

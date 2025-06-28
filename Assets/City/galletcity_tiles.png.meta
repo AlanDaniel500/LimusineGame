@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      galletcity_tiles_0: -7326130864017124952
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

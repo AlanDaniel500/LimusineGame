@@ -12,7 +12,7 @@ public class EnemyCarAI : MonoBehaviour
     private Transform destinationTarget = null;
 
     private Queue<Nodo> currentPath = new Queue<Nodo>();
-    private Nodo currentNodoObjetivo = null;
+    //private Nodo currentNodoObjetivo = null;
 
     private MyQueue<GameObject> passengerQueue = new MyQueue<GameObject>();
     private bool hasPassenger = false;

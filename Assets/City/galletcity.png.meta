@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      galletcity_0: -5282724793074359847
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
