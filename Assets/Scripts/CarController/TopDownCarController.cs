@@ -10,7 +10,7 @@ public class TopDownCarController : MonoBehaviour
     [SerializeField] private float turnFactor = 3.5f;
 
     [Header("Configuración")]
-    [SerializeField] private int maxPassengers = 4; // <- Sigue private
+    [SerializeField] private int maxPassengers = 4;
 
     private Rigidbody2D rb2D;
     private float accelerationInput = 0f;

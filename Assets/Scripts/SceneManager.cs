@@ -17,4 +17,10 @@ public class CambiarEscena : MonoBehaviour
     {
         SceneManager.LoadScene("Derrota");
     }
+
+    public void FinishLevel()
+    {
+        SceneManager.LoadScene("UpgradeScene");
+    }
+
 }

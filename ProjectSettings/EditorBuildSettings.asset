@@ -17,5 +17,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Victoria.unity
     guid: 4174def2f91d0c6449a6f40a39bf94fb
+  - enabled: 1
+    path: Assets/Scenes/UpgradeScene.unity
+    guid: 8a00f5fd4fc30424db208e17de45bd09
+  - enabled: 1
+    path: Assets/Scenes/SampleScene2.unity
+    guid: 1b151b791d15708449a02c88759d06b0
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
