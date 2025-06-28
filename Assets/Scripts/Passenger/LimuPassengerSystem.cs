@@ -104,6 +104,12 @@ public class LimuPassengerSystem : MonoBehaviour
         }
     }
 
+    // Devuelve el primer pasajero en la cola sin quitarlo
+    public GameObject PeekPassenger()
+    {
+        return passengerQueue.IsEmpty ? null : passengerQueue.Peek();
+    }
+
     private void ApplyNextPowerUp()
     {
         if (!powerUpStack.IsEmpty)
