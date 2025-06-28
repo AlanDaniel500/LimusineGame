@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class LimuPassengerSystem : MonoBehaviour
 {
@@ -13,12 +15,17 @@ public class LimuPassengerSystem : MonoBehaviour
     private float originalMaxSpeed;
     private bool isBoosted = false;
     private float boostTimer = 0f;
+    private int entregadosTotal = 0;
+
 
     private void Start()
     {
         carController = GetComponent<TopDownCarController>();
-        originalMaxSpeed = carController.maxSpeed;
         cambiarEscena = FindFirstObjectByType<CambiarEscena>();
+
+        // Aplicar mejora de velocidad según PlayerSpeedManager
+        originalMaxSpeed = carController.maxSpeed * PlayerSpeedManager.Instance.SpeedMultiplier;
+        carController.maxSpeed = originalMaxSpeed;
     }
 
     private void Update()
@@ -129,7 +136,9 @@ public class LimuPassengerSystem : MonoBehaviour
                 Destroy(tag.destination); // destruir destino
             }
 
-            Destroy(passenger); //  destruir pasajero
+            Destroy(passenger); // destruir pasajero
+
+            entregadosTotal++;
             Debug.Log("Player: Passenger entregado");
         }
     }
@@ -144,12 +153,25 @@ public class LimuPassengerSystem : MonoBehaviour
 
             if (cambiarEscena != null)
             {
-                cambiarEscena.IrAVictoria();
+                string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+                if (currentScene == "SampleScene")
+                {
+                   
+                    GameSessionManager.Instance.Entregados = entregadosTotal;
+                    cambiarEscena.FinishLevel();
+                }
+                else if (currentScene == "SampleScene2")
+                {
+                
+                    cambiarEscena.IrAVictoria();
+                }
+                else
+                {
+                    Debug.LogWarning("No se reconoció la escena actual. No se cambiará de escena.");
+                }
             }
-            else
-            {
-                Debug.LogError("No se encontró CambiarEscena.");
-            }
+
         }
     }
 
