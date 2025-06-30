@@ -108,9 +108,16 @@ public class LimuPassengerSystem : MonoBehaviour
                     passengerQueue.Enqueue(stolenPassenger);
                     Debug.Log("Player: ¡Robé un Pasajero al Enemigo!");
                 }
+
+                ArrowIndicator arrow = FindFirstObjectByType<ArrowIndicator>();
+                if (arrow != null)
+                {
+                    arrow.SetTarget(enemySystem.transform, false); // false = amarillo o color neutral
+                }
             }
         }
     }
+
 
     public GameObject PeekPassenger()
     {
