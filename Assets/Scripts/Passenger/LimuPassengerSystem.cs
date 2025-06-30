@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 public class LimuPassengerSystem : MonoBehaviour
 {
     [SerializeField] private PassengerSpawner passengerSpawner;
@@ -16,7 +15,6 @@ public class LimuPassengerSystem : MonoBehaviour
     private bool isBoosted = false;
     private float boostTimer = 0f;
     private int entregadosTotal = 0;
-
 
     private void Start()
     {
@@ -55,6 +53,16 @@ public class LimuPassengerSystem : MonoBehaviour
                 passengerQueue.Enqueue(collision.gameObject);
                 collision.gameObject.SetActive(false);
                 Debug.Log("Player: Pasajero recogido.");
+
+                // Cambiar flecha a destino
+                if (tag.destination != null)
+                {
+                    ArrowIndicator arrow = FindFirstObjectByType<ArrowIndicator>();
+                    if (arrow != null)
+                    {
+                        arrow.SetTarget(tag.destination.transform, true); // true = destino
+                    }
+                }
             }
         }
 
@@ -104,7 +112,6 @@ public class LimuPassengerSystem : MonoBehaviour
         }
     }
 
-    // Devuelve el primer pasajero en la cola sin quitarlo
     public GameObject PeekPassenger()
     {
         return passengerQueue.IsEmpty ? null : passengerQueue.Peek();
@@ -146,6 +153,17 @@ public class LimuPassengerSystem : MonoBehaviour
 
             entregadosTotal++;
             Debug.Log("Player: Passenger entregado");
+
+            // Volver a apuntar al siguiente pasajero
+            ArrowIndicator arrow = FindFirstObjectByType<ArrowIndicator>();
+            if (arrow != null && manager != null)
+            {
+                GameObject nextPassenger = manager.GetClosestPassenger();
+                if (nextPassenger != null)
+                {
+                    arrow.SetTarget(nextPassenger.transform, false); // false = buscar pasajero
+                }
+            }
         }
     }
 
@@ -159,17 +177,15 @@ public class LimuPassengerSystem : MonoBehaviour
 
             if (cambiarEscena != null)
             {
-                string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+                string currentScene = SceneManager.GetActiveScene().name;
 
                 if (currentScene == "SampleScene")
                 {
-                   
                     GameSessionManager.Instance.Entregados = entregadosTotal;
                     cambiarEscena.FinishLevel();
                 }
                 else if (currentScene == "SampleScene2")
                 {
-                
                     cambiarEscena.IrAVictoria();
                 }
                 else
@@ -177,7 +193,6 @@ public class LimuPassengerSystem : MonoBehaviour
                     Debug.LogWarning("No se reconoció la escena actual. No se cambiará de escena.");
                 }
             }
-
         }
     }
 
