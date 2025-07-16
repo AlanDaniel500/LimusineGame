@@ -12,18 +12,17 @@ public class LimuPassengerSystem : MonoBehaviour
     private CambiarEscena cambiarEscena;
 
     private float originalMaxSpeed;
-    private bool isBoosted = false;
     private float boostTimer = 0f;
+    private bool isBoosted = false;
     private int entregadosTotal = 0;
 
-    private void Start()
+    void Start()
     {
         carController = GetComponent<TopDownCarController>();
         cambiarEscena = FindFirstObjectByType<CambiarEscena>();
 
-        // Aplicar mejora de velocidad según PlayerSpeedManager
-        originalMaxSpeed = carController.maxSpeed * PlayerSpeedManager.Instance.SpeedMultiplier;
-        carController.maxSpeed = originalMaxSpeed;
+        // Guardar la velocidad ya modificada desde TopDownCarController
+        originalMaxSpeed = carController.maxSpeed;
     }
 
     private void Update()
@@ -35,7 +34,7 @@ public class LimuPassengerSystem : MonoBehaviour
             {
                 carController.maxSpeed = originalMaxSpeed;
                 isBoosted = false;
-                Debug.Log("Player: Se terminó el boost de velocidad.");
+                Debug.Log($"[Boost Ended] MaxSpeed restaurado a: {originalMaxSpeed}");
             }
         }
     }
@@ -54,14 +53,11 @@ public class LimuPassengerSystem : MonoBehaviour
                 collision.gameObject.SetActive(false);
                 Debug.Log("Player: Pasajero recogido.");
 
-                // Cambiar flecha a destino
                 if (tag.destination != null)
                 {
                     ArrowIndicator arrow = FindFirstObjectByType<ArrowIndicator>();
                     if (arrow != null)
-                    {
-                        arrow.SetTarget(tag.destination.transform, true); // true = destino
-                    }
+                        arrow.SetTarget(tag.destination.transform, true);
                 }
             }
         }
@@ -111,17 +107,9 @@ public class LimuPassengerSystem : MonoBehaviour
 
                 ArrowIndicator arrow = FindFirstObjectByType<ArrowIndicator>();
                 if (arrow != null)
-                {
-                    arrow.SetTarget(enemySystem.transform, false); // false = amarillo o color neutral
-                }
+                    arrow.SetTarget(enemySystem.transform, false);
             }
         }
-    }
-
-
-    public GameObject PeekPassenger()
-    {
-        return passengerQueue.IsEmpty ? null : passengerQueue.Peek();
     }
 
     private void ApplyNextPowerUp()
@@ -134,7 +122,7 @@ public class LimuPassengerSystem : MonoBehaviour
             boostTimer = powerUp.duration;
             isBoosted = true;
 
-            Debug.Log($"Player: PowerUp x{powerUp.speedMultiplier} por {powerUp.duration} seg.");
+            Debug.Log($"[Boost] Aplicado: x{powerUp.speedMultiplier} por {powerUp.duration} seg. Nueva MaxSpeed: {carController.maxSpeed}");
         }
     }
 
@@ -146,30 +134,22 @@ public class LimuPassengerSystem : MonoBehaviour
 
             PassengerManager manager = FindFirstObjectByType<PassengerManager>();
             if (manager != null)
-            {
                 manager.NotifyPassengerDelivered(passenger);
-            }
 
             PassengerTag tag = passenger.GetComponent<PassengerTag>();
             if (tag != null && tag.destination != null)
-            {
-                Destroy(tag.destination); // destruir destino
-            }
+                Destroy(tag.destination);
 
-            Destroy(passenger); // destruir pasajero
-
+            Destroy(passenger);
             entregadosTotal++;
             Debug.Log("Player: Passenger entregado");
 
-            // Volver a apuntar al siguiente pasajero
             ArrowIndicator arrow = FindFirstObjectByType<ArrowIndicator>();
             if (arrow != null && manager != null)
             {
                 GameObject nextPassenger = manager.GetClosestPassenger();
                 if (nextPassenger != null)
-                {
-                    arrow.SetTarget(nextPassenger.transform, false); // false = buscar pasajero
-                }
+                    arrow.SetTarget(nextPassenger.transform, false);
             }
         }
     }
@@ -197,11 +177,13 @@ public class LimuPassengerSystem : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("No se reconoció la escena actual. No se cambiará de escena.");
+                    Debug.LogWarning("No se reconoció la escena actual.");
                 }
             }
         }
     }
+
+    public GameObject PeekPassenger() => passengerQueue.IsEmpty ? null : passengerQueue.Peek();
 
     public int GetPassengerCount() => passengerQueue.Count;
 
@@ -210,10 +192,9 @@ public class LimuPassengerSystem : MonoBehaviour
     public GameObject StealPassenger()
     {
         if (!passengerQueue.IsEmpty)
-        {
             return passengerQueue.Dequeue();
-        }
         return null;
     }
 }
+
 
