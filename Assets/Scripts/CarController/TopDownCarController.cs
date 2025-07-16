@@ -24,6 +24,7 @@ public class TopDownCarController : MonoBehaviour
     void Start()
     {
         rb2D = GetComponent<Rigidbody2D>();
+        maxSpeed *= PlayerSpeedManager.Instance.SpeedMultiplier;
     }
 
     private void FixedUpdate()
