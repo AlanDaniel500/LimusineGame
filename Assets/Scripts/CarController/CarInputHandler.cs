@@ -15,28 +15,25 @@ public class CarInputHandler : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Combina aceleracion y freno en un solo valor (positivo para avanzar, negativo para reversa)
         float acceleration = throttleInput - brakeInput;
 
-        // Enviar inputs al controlador del auto
         topDownCarController.SetInputVector(new Vector2(steerInput, acceleration));
     }
 
-    // Metodo llamado por Input System cuando mueves el stick izquierdo
     public void OnSteer(InputAction.CallbackContext context)
     {
-        steerInput = context.ReadValue<Vector2>().x; // Tomamos solo el eje X (izquierda/derecha)
+        steerInput = context.ReadValue<Vector2>().x;
     }
 
-    // Método llamado por Input System cuando presionas R2
+    //Acelerar
     public void OnAccelerate(InputAction.CallbackContext context)
     {
-        throttleInput = context.ReadValue<float>(); // Devuelve un valor entre 0 y 1
+        throttleInput = context.ReadValue<float>();
     }
 
-    // Método llamado por Input System cuando presionas L2
+    //Frenar
     public void OnBrake(InputAction.CallbackContext context)
     {
-        brakeInput = context.ReadValue<float>(); // Devuelve un valor entre 0 y 1
+        brakeInput = context.ReadValue<float>();
     }
 }

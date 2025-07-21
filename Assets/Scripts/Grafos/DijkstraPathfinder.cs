@@ -9,7 +9,7 @@ public static class DijkstraPathfinder
         Dictionary<Nodo, Nodo> prev = new Dictionary<Nodo, Nodo>();
         List<Nodo> unvisited = new List<Nodo>();
 
-        // Inicializar
+      
         foreach (Nodo nodo in Object.FindObjectsOfType<Nodo>())
         {
             dist[nodo] = Mathf.Infinity;
@@ -20,7 +20,7 @@ public static class DijkstraPathfinder
 
         while (unvisited.Count > 0)
         {
-            // Buscar el nodo no visitado con menor distancia
+   
             Nodo current = null;
             float minDist = Mathf.Infinity;
             foreach (Nodo n in unvisited)
@@ -37,7 +37,7 @@ public static class DijkstraPathfinder
 
             unvisited.Remove(current);
 
-            // Revisar vecinos
+
             foreach (Nodo vecino in current.vecinos)
             {
                 float alt = dist[current] + Vector2.Distance(current.Posicion, vecino.Posicion);
@@ -49,7 +49,7 @@ public static class DijkstraPathfinder
             }
         }
 
-        // Reconstruir el camino
+  
         List<Nodo> path = new List<Nodo>();
         Nodo step = goal;
 

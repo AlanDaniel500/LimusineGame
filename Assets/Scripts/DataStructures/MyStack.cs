@@ -3,17 +3,17 @@ using UnityEngine;
 
 public class MyStack<T> : IStack<T>
 {
-    // Clase interna para los nodos de la pila
+   
     private class Node
     {
         public T Data;
         public Node Next;
     }
 
-    private Node top;   // Referencia al nodo de la cima
-    private int count;  // Cantidad de elementos
+    private Node top;  
+    private int count;  
 
-    // Propiedades de la interfaz
+ 
     public int Count => count;
     public bool IsEmpty => count == 0;
 

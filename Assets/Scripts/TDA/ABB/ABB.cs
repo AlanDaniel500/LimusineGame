@@ -32,14 +32,14 @@ public class ABBVelocidad : IABB
         else if (puntos > nodo.puntos)
             nodo.derecha = InsertarRecursivo(nodo.derecha, puntos, mejora);
         else
-            nodo.mejora = mejora; // Actualiza si ya existe
+            nodo.mejora = mejora;
 
         return nodo;
     }
 
     public float BuscarMejora(int puntos)
     {
-        return BuscarMejoraRec(raiz, puntos, 1f); // valor por defecto si no encuentra mejora
+        return BuscarMejoraRec(raiz, puntos, 1f);
     }
 
     private float BuscarMejoraRec(Nodo nodo, int puntos, float mejorHastaAhora)

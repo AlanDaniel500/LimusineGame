@@ -3,18 +3,18 @@ using UnityEngine;
 
 public class MyQueue<T> : IQueue<T>
 {
-    // Clase interna para los nodos de la cola
+    
     private class Node
     {
         public T Data;
         public Node Next;
     }
 
-    private Node head;  // Primer nodo de la cola
-    private Node tail;  // Último nodo de la cola
-    private int count;  // Cantidad de elementos
+    private Node head; 
+    private Node tail;  
+    private int count;  
 
-    // Propiedades de la interfaz
+
     public int Count => count;
     public bool IsEmpty => count == 0;
 

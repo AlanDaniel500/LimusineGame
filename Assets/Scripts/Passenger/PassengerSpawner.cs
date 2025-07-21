@@ -33,7 +33,7 @@ public class PassengerSpawner : MonoBehaviour
             return null;
         }
 
-        // 1. Crear lista de nodos y ordenarla por distancia al jugador
+        //lista de nodos odedenada por distancia al jugador
         List<GameObject> nodoList = new List<GameObject>();
         foreach (var nodo in nodos)
         {
@@ -42,13 +42,13 @@ public class PassengerSpawner : MonoBehaviour
 
         QuickSortUtility.QuickSortByDistance(nodoList, playerTransform);
 
-        // 2. Elegir un nodo cercano pero no el más cercano
+        //Se elije el nodo más cercano
         int rangoMin = 1;
-        int rangoMax = Mathf.Min(4, nodoList.Count - 1); // Hasta el 4º más cercano
+        int rangoMax = Mathf.Min(4, nodoList.Count - 1);
         int indexPasajero = Random.Range(rangoMin, rangoMax + 1);
         Nodo nodoPasajero = nodoList[indexPasajero].GetComponent<Nodo>();
 
-        // 3. Elegir un destino suficientemente alejado del pasajero
+        //Elije un destino que no este cerca del pasajero
         Nodo nodoDestino;
         int intentos = 0;
         do
@@ -56,11 +56,11 @@ public class PassengerSpawner : MonoBehaviour
             nodoDestino = nodos[Random.Range(0, nodos.Length)];
             intentos++;
 
-            if (intentos > 10) break; // evitar bucle infinito
+            if (intentos > 10) break;
         } while (nodoDestino == nodoPasajero ||
                  Vector2.Distance(nodoDestino.Posicion, nodoPasajero.Posicion) < 5f);
 
-        // 4. Instanciar pasajero y destino
+        //Instanciar pasajero y destino
         GameObject passenger = Instantiate(passengerPrefab, nodoPasajero.Posicion, Quaternion.identity);
         passenger.tag = "Passenger";
 

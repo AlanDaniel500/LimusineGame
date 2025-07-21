@@ -21,7 +21,6 @@ public class LimuPassengerSystem : MonoBehaviour
         carController = GetComponent<TopDownCarController>();
         cambiarEscena = FindFirstObjectByType<CambiarEscena>();
 
-        // Guardar la velocidad ya modificada desde TopDownCarController
         originalMaxSpeed = carController.maxSpeed;
     }
 

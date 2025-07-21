@@ -46,8 +46,6 @@ public class ArrowIndicator : MonoBehaviour
             arrowUI.gameObject.SetActive(false);
         }
     }
-
-    // Usá este método para actualizar el objetivo de la flecha
     public void SetTarget(Transform newTarget, bool esDestino)
     {
         target = newTarget;

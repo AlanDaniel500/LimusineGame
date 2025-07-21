@@ -211,7 +211,7 @@ public class EnemyCarAI : MonoBehaviour
             nodoActual = anteriores[nodoActual];
         }
 
-        if (camino.Count == 0) camino.Add(destino); // fallback
+        if (camino.Count == 0) camino.Add(destino);
         return camino;
     }
 
