@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      yellow-lightning-bolt-icon-isolated-on-transparent-background-png_0: -2405965479986446252
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
